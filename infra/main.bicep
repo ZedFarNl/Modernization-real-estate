@@ -32,6 +32,8 @@ param appServicePlanName string = ''
 param eventGridName string = ''
 param cmsImageName string = ''
 param blogImageName string = ''
+param notificationsServiceName string = ''
+param notificationsImageName string = ''
 param stripeImageName string = ''
 param stripeServiceUrl string = ''
 
@@ -201,6 +203,34 @@ module portalBackend './app/portal-backend.bicep' = {
   }
 }
 
+
+// the realt-time notification integration
+module notifications 'app/notifications.bicep' = {
+  name: 'notifications'
+  scope: rg
+  params: {
+    name: !empty(notificationsServiceName) ? notificationsServiceName :  '${abbrs.appContainerApps}web-${resourceToken}'
+    location: location
+    tags: tags
+  }
+}
+
+module notificationsBackend 'app/notifications-backend.bicep' = {
+  name: 'notifications-api'
+  scope: rg
+  params: {
+    name: !empty(notificationsServiceName) ? notificationsServiceName :  '${abbrs.appContainerApps}api-${resourceToken}'
+    location: location
+    tags: tags
+    notificationsImageName: notificationsImageName
+    applicationInsightsName: monitoring.outputs.applicationInsightsName
+    notificationsServiceName: notifications.outputs.SERVICE_WEBPUBSUB_NAME
+    containerAppsEnvironmentName: !empty(containerAppsEnvironmentName) ? containerAppsEnvironmentName : '${abbrs.appManagedEnvironments}${resourceToken}'
+    containerRegistryName: !empty(containerRegistryName) ? containerRegistryName : '${abbrs.containerRegistryRegistries}${resourceToken}'
+    keyVaultName: keyVault.outputs.name
+  }
+}
+
 // The application database
 module cosmos './app/db.bicep' = {
   name: 'cosmos'
@@ -290,7 +320,7 @@ module cms './app/cms.bicep' = {
   }
 }
 
-// The cms database
+// // The cms database
 module cmsDB './core/database/postgresql/flexibleserver.bicep' = {
   name: 'postgresql'
   scope: rg
@@ -407,3 +437,8 @@ output STRAPI_DATABASE_PORT string = cmsDatabasePort
 output CMS_DATABASE_SERVER_NAME string = cmsDB.outputs.POSTGRES_SERVER_NAME
 // We need this to manually restore the database
 output STRAPI_DATABASE_PASSWORD string = cmsDatabasePassword
+
+
+
+output SERVICE_WEBPUBSUB_NAME string = notifications.outputs.SERVICE_WEBPUBSUB_NAME
+output SERVICE_WEBPUBSUB_URI string = notifications.outputs.SERVICE_WEBPUBSUB_NAME

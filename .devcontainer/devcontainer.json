@@ -10,7 +10,6 @@
   "features": {
     "ghcr.io/azure/azure-dev/azd:latest": {},
     "ghcr.io/devcontainers/features/node:1": {
-      // NOTE: See https://github.com/Azure-Samples/contoso-real-estate/pull/191
       "version": "18.15.0"
     },
     "ghcr.io/devcontainers-contrib/features/postgres-asdf:1": {},
@@ -44,6 +43,10 @@
     },
     "4242": {
       "label": "Stripe API",
+      "onAutoForward": "notify"
+    },
+    "4300": {
+      "label": "Web PubSub API",
       "onAutoForward": "notify"
     }
   },

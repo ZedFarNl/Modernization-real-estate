@@ -26,6 +26,15 @@ services:
         # Note: the current working directory is ./packages/portal
         run: ../../infra/hooks/portal/predeploy.js
 
+  notifications:
+    project: packages/notifications
+    docker:
+      context: .
+      path: ./Dockerfile
+    language: js
+    host: containerapp
+    module: app/notifications
+
   api:
     project: packages/api
     language: ts
